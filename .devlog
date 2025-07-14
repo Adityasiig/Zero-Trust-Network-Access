@@ -3,3 +3,4 @@
 [2025-06-04] fix: handshake on key mismatch (1)
 [2025-06-25] feat: Dilithium signature update (1)
 [2025-06-25] feat: Dilithium signature update (2)
+[2025-07-14] fix: entropy seeding issue (1)
