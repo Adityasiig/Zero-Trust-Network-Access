@@ -6,3 +6,4 @@
 [2025-07-14] fix: entropy seeding issue (1)
 [2025-08-01] feat: threat dashboard UI (1)
 [2025-08-01] feat: threat dashboard UI (2)
+[2025-08-19] fix: real-time event stream bug (1)
