@@ -15,3 +15,4 @@
 [2025-11-04] fix: session expiry handling (1)
 [2025-11-23] feat: audit log module (1)
 [2025-11-23] feat: audit log module (2)
+[2025-12-11] fix: token rotation edge case (1)
