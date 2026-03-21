@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZTNA-PQC | Zero Trust Network Access</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+</head>
+<body>
+    <!-- Scan Line Effect -->
+    <div class="scan-line"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <svg viewBox="0 0 40 40" class="shield-icon">
+                    <path d="M20 2 L36 10 L36 22 C36 32 28 38 20 40 C12 38 4 32 4 22 L4 10 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M14 20 L18 24 L26 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="20" cy="20" r="3" fill="currentColor" opacity="0.3"/>
+                </svg>
+                <div>
+                    <h1>ZTNA<span class="accent">-PQC</span></h1>
+                    <p class="subtitle">Zero Trust Network Access &bull; Post-Quantum Cryptography</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status-indicator">
+                <span class="pulse-dot"></span>
+                <span id="connection-status">Connecting...</span>
+            </div>
+            <div class="header-stat">
+                <span class="stat-label">PQC</span>
+                <span class="stat-value accent" id="header-pqc-status">ACTIVE</span>
+            </div>
+            <div class="header-stat">
+                <span class="stat-label">FIPS</span>
+                <span class="stat-value" id="header-fips">203/204</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Top Stats Bar -->
+        <section class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-icon devices-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-devices">0</span>
+                    <span class="stat-desc">Active Devices</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon shield-stat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-trust">0</span>
+                    <span class="stat-desc">Trust Score</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon threat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-threats">0</span>
+                    <span class="stat-desc">Threats (1h)</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon key-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-pqc-coverage">0%</span>
+                    <span class="stat-desc">PQC Coverage</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon request-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number" id="stat-blocked">0</span>
+                    <span class="stat-desc">Blocked Requests</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid Layout -->
+        <div class="dashboard-grid">
+            <!-- Trust Score Gauge -->
+            <div class="card trust-card">
+                <div class="card-header">
+                    <h2>Network Trust Score</h2>
+                    <span class="badge" id="risk-badge">LOW RISK</span>
+                </div>
+                <div class="card-body">
+                    <div class="gauge-container">
+                        <canvas id="trust-gauge" width="280" height="180"></canvas>
+                        <div class="gauge-value" id="gauge-value">0</div>
+                        <div class="gauge-label">Composite Score</div>
+                    </div>
+                    <div class="trust-factors" id="trust-factors">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Authentication -->
+            <div class="card devices-card">
+                <div class="card-header">
+                    <h2>Device Authentication</h2>
+                    <span class="device-count" id="device-count">0 devices</span>
+                </div>
+                <div class="card-body">
+                    <div class="device-list" id="device-list">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PQC Encryption Status -->
+            <div class="card pqc-card">
+                <div class="card-header">
+                    <h2>Post-Quantum Cryptography</h2>
+                    <span class="badge badge-green">QUANTUM SAFE</span>
+                </div>
+                <div class="card-body">
+                    <div class="pqc-algorithms">
+                        <div class="algo-card">
+                            <div class="algo-header">
+                                <span class="algo-name">CRYSTALS-Kyber</span>
+                                <span class="algo-tag">ML-KEM-768</span>
+                            </div>
+                            <div class="algo-detail">Key Encapsulation Mechanism</div>
+                            <div class="algo-specs">
+                                <div class="spec"><span>Public Key</span><span>1,184 B</span></div>
+                                <div class="spec"><span>Ciphertext</span><span>1,088 B</span></div>
+                                <div class="spec"><span>Security</span><span>Level 3</span></div>
+                            </div>
+                            <div class="spec-bar"><div class="spec-bar-fill" style="width: 75%"></div></div>
+                        </div>
+                        <div class="algo-card">
+                            <div class="algo-header">
+                                <span class="algo-name">CRYSTALS-Dilithium</span>
+                                <span class="algo-tag">ML-DSA-65</span>
+                            </div>
+                            <div class="algo-detail">Digital Signature Algorithm</div>
+                            <div class="algo-specs">
+                                <div class="spec"><span>Public Key</span><span>1,952 B</span></div>
+                                <div class="spec"><span>Signature</span><span>3,293 B</span></div>
+                                <div class="spec"><span>Security</span><span>Level 3</span></div>
+                            </div>
+                            <div class="spec-bar"><div class="spec-bar-fill" style="width: 75%"></div></div>
+                        </div>
+                    </div>
+                    <div class="pqc-status-row">
+                        <div class="pqc-stat">
+                            <span class="pqc-stat-label">Key Age</span>
+                            <span class="pqc-stat-value" id="pqc-key-age">0s</span>
+                        </div>
+                        <div class="pqc-stat">
+                            <span class="pqc-stat-label">Rotations</span>
+                            <span class="pqc-stat-value" id="pqc-rotations">0</span>
+                        </div>
+                        <div class="pqc-stat">
+                            <span class="pqc-stat-label">Encryptions</span>
+                            <span class="pqc-stat-value" id="pqc-encryptions">0</span>
+                        </div>
+                    </div>
+                    <!-- PQC Demo -->
+                    <div class="pqc-demo">
+                        <input type="text" id="pqc-demo-input" placeholder="Type message to encrypt..." class="demo-input">
+                        <button onclick="demoEncrypt()" class="demo-btn">Encrypt & Sign</button>
+                        <div class="demo-output" id="pqc-demo-output"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Threat Monitoring -->
+            <div class="card threats-card">
+                <div class="card-header">
+                    <h2>Threat Monitoring</h2>
+                    <div class="threat-summary">
+                        <span class="threat-count critical" id="threats-critical">0</span>
+                        <span class="threat-count high" id="threats-high">0</span>
+                        <span class="threat-count medium" id="threats-medium">0</span>
+                        <span class="threat-count low" id="threats-low">0</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="threat-chart-container">
+                        <canvas id="threat-chart" height="150"></canvas>
+                    </div>
+                    <div class="threat-feed" id="threat-feed">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Access Policies -->
+            <div class="card policies-card">
+                <div class="card-header">
+                    <h2>Access Policies</h2>
+                    <span class="policy-count" id="policy-count">0 active</span>
+                </div>
+                <div class="card-body">
+                    <div class="policy-list" id="policy-list">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Topology -->
+            <div class="card topology-card">
+                <div class="card-header">
+                    <h2>Network Topology</h2>
+                    <div class="zone-legend" id="zone-legend">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+                <div class="card-body topology-body">
+                    <svg id="topology-svg"></svg>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <span>ZTNA-PQC v1.0 &bull; NIST FIPS 203/204 Compliant Simulation &bull; Zero Trust Architecture</span>
+        <span>Built with CRYSTALS-Kyber &amp; CRYSTALS-Dilithium</span>
+    </footer>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/topology.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
